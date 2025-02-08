@@ -159,3 +159,105 @@ class TestAccountService(TestCase):
             self.assertIn("phone_number", account)
             self.assertIn("date_joined", account)
     
+    def test_read_account(self):
+        """It should retrieve an account by ID and return HTTP_200_OK, else return HTTP_404_NOT_FOUND"""
+        # Step 1: Try to fetch an account that does not exist
+        response = self.client.get(f"{BASE_URL}/999999")  # Assuming this ID does not exist
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        # Step 2: Ensure the response contains an error message
+        error_message = response.get_json()
+        self.assertIn("error", error_message)
+        self.assertEqual(error_message["error"], "Account not found")
+
+        # Step 3: Create a test account
+        account = AccountFactory()
+        response = self.client.post(BASE_URL, json=account.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED) 
+
+        # Extract account ID from response
+        new_account = response.get_json()
+        account_id = new_account["id"]
+
+        # Step 2: Retrieve the account by ID
+        response = self.client.get(f"{BASE_URL}/{account_id}")
+
+        # Validate the response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Deserialize the response and compare values
+        retrieved_account = response.get_json()
+        self.assertEqual(retrieved_account["id"], account_id)
+        self.assertEqual(retrieved_account["name"], account.name)
+        self.assertEqual(retrieved_account["email"], account.email)
+        self.assertEqual(retrieved_account["address"], account.address)
+        self.assertEqual(retrieved_account["phone_number"], account.phone_number)
+        self.assertEqual(retrieved_account["date_joined"], str(account.date_joined))
+
+    def test_update_account(self): 
+        """It should update an existing account and return HTTP_200_OK, return 404 if not found"""
+        # Step 1: Attempt to update an account that does not exist
+        response = self.client.put(f"{BASE_URL}/999999", json={})
+
+        # Step 2: Validate response (Should return 404 NOT FOUND)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        
+        # Step 3: Create a test account
+        account = AccountFactory()
+        response = self.client.post(BASE_URL, json=account.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Extract account ID from response
+        new_account = response.get_json()
+        account_id = new_account["id"]
+
+        # Step 2: Prepare updated data
+        updated_data = {
+            "name": "Updated Name",
+            "email": "updated@example.com",
+            "address": "Updated Address",
+            "phone_number": "123-456-7890",
+            "date_joined": new_account["date_joined"]  # Keep the same date
+        }
+
+        # Step 3: Send PUT request to update the account
+        response = self.client.put(f"{BASE_URL}/{account_id}", json=updated_data)
+
+        # Step 4: Validate response (Should return 200 OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Step 5: Fetch the updated account and verify the changes
+        response = self.client.get(f"{BASE_URL}/{account_id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        updated_account = response.get_json()
+        self.assertEqual(updated_account["name"], "Updated Name")
+        self.assertEqual(updated_account["email"], "updated@example.com")
+        self.assertEqual(updated_account["address"], "Updated Address")
+        self.assertEqual(updated_account["phone_number"], "123-456-7890")
+        self.assertEqual(updated_account["date_joined"], new_account["date_joined"])  # Should not change
+
+    def test_delete_account(self):
+        """It should delete an account and return HTTP_204_NO_CONTENT"""
+
+        # Step 1: Create a test account
+        account = AccountFactory()
+        response = self.client.post(BASE_URL, json=account.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Extract account ID from response
+        new_account = response.get_json()
+        account_id = new_account["id"]
+
+        # Step 2: Delete the account
+        response = self.client.delete(f"{BASE_URL}/{account_id}")
+
+        # Step 3: Validate response (Should return 204 NO CONTENT)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(response.data, b"")  # Ensures the body is empty
+
+        # Step 4: Try to retrieve the deleted account
+        response = self.client.get(f"{BASE_URL}/{account_id}")
+
+        # Step 5: Validate that the account no longer exists (Should return 404)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

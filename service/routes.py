@@ -77,20 +77,56 @@ def get_all_accounts_route():
 
 # ... place you code here to READ an account ...
 
+@app.route("/accounts/<int:account_id>", methods=["GET"])
+def get_account(account_id):
+    """Retrieve an account by ID"""
+    # Use Account.find() to locate the account
+    account = Account.find(account_id)
+
+    if not account:
+        # If the account is not found, return a 404 response
+        return make_response(jsonify({"error": "Account not found"}), 404)
+
+    # If found, serialize the account and return it with a 200 status
+    return make_response(jsonify(account.serialize()), 200)
+
 
 ######################################################################
 # UPDATE AN EXISTING ACCOUNT
 ######################################################################
 
 # ... place you code here to UPDATE an account ...
+@app.route("/accounts/<int:account_id>", methods=["PUT"])
+def update_account(account_id):
+    """Update an existing account"""
+    account = Account.find(account_id)
+    if not account:
+        return make_response(jsonify({"error": "Account not found"}), 404)
 
+    data = request.get_json()
+    account.deserialize(data)
+    account.update()
+
+    return make_response(jsonify(account.serialize()), status.HTTP_200_OK)
 
 ######################################################################
 # DELETE AN ACCOUNT
 ######################################################################
 
 # ... place you code here to DELETE an account ...
+@app.route("/accounts/<int:account_id>", methods=["DELETE"])
+def delete_account(account_id):
+    """Delete an account by ID"""
+    
+    # Step 1: Find the account
+    account = Account.find(account_id)
 
+    # Step 2: If the account exists, delete it
+    if account:
+        account.delete()
+
+    # Step 3: Return an empty response with HTTP_204_NO_CONTENT
+    return make_response("", 204)
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
