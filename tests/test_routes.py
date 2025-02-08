@@ -124,3 +124,38 @@ class TestAccountService(TestCase):
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
     # ADD YOUR TEST CASES HERE ...
+    def test_list_all_accounts(self):
+        """It should return all accounts from /accounts/all_accounts as a list of dict and HTTP_200_OK"""
+        # Define the endpoint being tested
+        url = f"{BASE_URL}/all_accounts"
+
+        # Step 1: Ensure the database is empty
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.get_json(), [])  # Expecting an empty list
+
+        # Step 2: Create some test accounts
+        self._create_accounts(3)  # Creating 3 accounts
+
+        # Step 3: Retrieve the list of accounts
+        response = self.client.get(url)
+
+        # Validate response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)  # Should always be 200
+        data = response.get_json()  # ✅ Fixed variable name from "daa" to "data"
+
+        # Ensure the response is a list
+        self.assertIsInstance(data, list)
+
+        # Ensure it contains the correct number of accounts
+        self.assertEqual(len(data), 3)  # ✅ Fixed the indentation issue
+
+        # Check that each account contains expected keys
+        for account in data:
+            self.assertIn("id", account)
+            self.assertIn("name", account)
+            self.assertIn("email", account)
+            self.assertIn("address", account)
+            self.assertIn("phone_number", account)
+            self.assertIn("date_joined", account)
+    
