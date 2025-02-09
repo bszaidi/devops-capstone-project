@@ -62,7 +62,7 @@ def create_accounts():
 ######################################################################
 
 # ... place you code here to LIST accounts ...
-@app.route("/accounts/all_accounts", methods=["GET"])
+@app.route("/accounts", methods=["GET"])
 def get_all_accounts_route():
     """Endpoint to fetch all accounts"""
     # Fetch and serialize all accounts

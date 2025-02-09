@@ -126,11 +126,9 @@ class TestAccountService(TestCase):
     # ADD YOUR TEST CASES HERE ...
     def test_list_all_accounts(self):
         """It should return all accounts from /accounts/all_accounts as a list of dict and HTTP_200_OK"""
-        # Define the endpoint being tested
-        url = f"{BASE_URL}/all_accounts"
 
         # Step 1: Ensure the database is empty
-        response = self.client.get(url)
+        response = self.client.get(BASE_URL)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.get_json(), [])  # Expecting an empty list
 
@@ -138,7 +136,7 @@ class TestAccountService(TestCase):
         self._create_accounts(3)  # Creating 3 accounts
 
         # Step 3: Retrieve the list of accounts
-        response = self.client.get(url)
+        response = self.client.get(BASE_URL)
 
         # Validate response
         self.assertEqual(response.status_code, status.HTTP_200_OK)  # Should always be 200
