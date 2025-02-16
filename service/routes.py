@@ -57,9 +57,11 @@ def create_accounts():
         jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
     )
 
+
 ######################################################################
 # LIST ALL ACCOUNTS
 ######################################################################
+
 
 # ... place you code here to LIST accounts ...
 @app.route("/accounts", methods=["GET"])
@@ -71,12 +73,13 @@ def get_all_accounts_route():
     # Return response with HTTP_200_OK status code
     return make_response(jsonify(accounts), 200)
 
+
 ######################################################################
 # READ AN ACCOUNT
 ######################################################################
 
-# ... place you code here to READ an account ...
 
+# ... place you code here to READ an account ...
 @app.route("/accounts/<int:account_id>", methods=["GET"])
 def get_account(account_id):
     """Retrieve an account by ID"""
@@ -95,6 +98,7 @@ def get_account(account_id):
 # UPDATE AN EXISTING ACCOUNT
 ######################################################################
 
+
 # ... place you code here to UPDATE an account ...
 @app.route("/accounts/<int:account_id>", methods=["PUT"])
 def update_account(account_id):
@@ -109,15 +113,16 @@ def update_account(account_id):
 
     return make_response(jsonify(account.serialize()), status.HTTP_200_OK)
 
+
 ######################################################################
 # DELETE AN ACCOUNT
 ######################################################################
+
 
 # ... place you code here to DELETE an account ...
 @app.route("/accounts/<int:account_id>", methods=["DELETE"])
 def delete_account(account_id):
     """Delete an account by ID"""
-    
     # Step 1: Find the account
     account = Account.find(account_id)
 
@@ -127,6 +132,7 @@ def delete_account(account_id):
 
     # Step 3: Return an empty response with HTTP_204_NO_CONTENT
     return make_response("", 204)
+
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
